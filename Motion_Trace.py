@@ -50,7 +50,7 @@ class Particle (plotocc):
         alpha = - self.k / self.m
         ux, uy, uz = alpha * vx, alpha * vy, alpha * vz
         uy += -0.5 * py
-        uz -= cnt.g/(pz)
+        uz -= cnt.g / (pz)
         return np.array([vx, vy, vz, ux, uy, uz])
 
     def compute_trajectory(self, t0=0.0, t1=2000):
@@ -69,7 +69,7 @@ class Particle (plotocc):
             sys.stdout.flush()
             self.pts.append(gp_Pnt(*r.y[:3]))
             self.vel.append(gp_Vec(*r.y[3:]))
-            #self.check_ground()
+            # self.check_ground()
             r.integrate(r.t + dt)
 
         print()

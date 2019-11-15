@@ -12,8 +12,11 @@ from OCC.gp import gp_Pnt, gp_Vec, gp_Dir
 from OCC.gp import gp_Ax1, gp_Ax2, gp_Ax3
 from OCC.gp import gp_Quaternion
 from OCC.gp import gp_XYZ
-from OCC.gp import gp_Lin
+from OCC.gp import gp_Lin, gp_Pln
 from OCC.gp import gp_Mat, gp_GTrsf, gp_Trsf
+from OCC.BRep import BRep_Tool
+from OCC.GeomAPI import GeomAPI_IntCS, GeomAPI_PointsToBSpline
+from OCC.TColgp import TColgp_Array1OfPnt
 from OCC.TopoDS import TopoDS_Shape
 from OCC.TopLoc import TopLoc_Location
 from OCC.BRepPrimAPI import BRepPrimAPI_MakeSphere
@@ -22,6 +25,7 @@ from OCC.BRepBuilderAPI import BRepBuilderAPI_GTransform
 from OCC.Extend.ShapeFactory import make_box, make_wire
 from OCC.Extend.ShapeFactory import points_to_bspline
 from OCCUtils.Construct import make_line, make_plane, make_polygon
+from OCCUtils.Construct import make_face
 from OCCUtils.Construct import point_to_vector, vector_to_point
 from OCCUtils.Construct import dir_to_vec, vec_to_dir
 
@@ -45,7 +49,7 @@ class plot2d (object):
 
     def div_axs(self):
         self.div = make_axes_locatable(self.axs)
-        #self.axs.set_aspect('equal')
+        # self.axs.set_aspect('equal')
 
         self.ax_x = self.div.append_axes(
             "bottom", 1.0, pad=0.5, sharex=self.axs)
@@ -71,7 +75,7 @@ class plot2d (object):
         self.fig.colorbar(im, ax=self.axs, shrink=0.9)
         plt.tight_layout()
         self.fig.savefig(png)
-        #plt.close()
+        # plt.close()
 
     def Show(self):
         try:
@@ -145,6 +149,21 @@ class plot3d (object):
             plt.show()
         except AttributeError:
             pass
+
+
+def spl_2pnt(p0=gp_Pnt(0, 0, 0), p1=gp_Pnt(0, 0, 1)):
+    pts = TColgp_Array1OfPnt(1, 2)
+    pts.SetValue(1, p0)
+    pts.SetValue(2, p1)
+    crv = GeomAPI_PointsToBSpline(pts).Curve()
+    return crv
+
+
+def pln_for_axs(axs=gp_Ax3(), lxy=[100, 100]):
+    xs, xe = -lxy[0] / 2, lxy[0] / 2
+    ys, ye = -lxy[1] / 2, lxy[1] / 2
+    face = make_face(gp_Pln(axs), xs, xe, ys, ye)
+    return face
 
 
 def move_pnt_to_dir(axs=gp_Ax3(), scale=100):

@@ -47,4 +47,3 @@ if __name__ == '__main__':
     print(pnt_crv)
     print(vec_crv)
     print(gp_Vec(p0, p1))
-    
