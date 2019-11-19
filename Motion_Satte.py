@@ -20,9 +20,10 @@ from OCC.GeomLProp import GeomLProp_SurfaceTool, GeomLProp_CurveTool
 from OCC.TColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_polygon
 from OCCUtils.Construct import make_edge, make_plane
+from OCCUtils.Construct import vec_to_dir, dir_to_vec
 
 from base import plotocc, plot2d
-from base import pln_for_axs, gen_ellipsoid, spl_2pnt
+from base import pln_for_axs, gen_ellipsoid, spl_2pnt, spl_face
 
 # Earth Radius: 6, 371 km
 # F_g = G m_1 * m_2 / (r_1 * r_2)
@@ -40,8 +41,14 @@ class Particle (plotocc):
         self.k = 0.0
         ray = spl_2pnt()
 
+        px = np.linspace(-1, 1, 50) * 750
+        py = np.linspace(-1, 1, 50) * 750
+        mesh = np.meshgrid(px, py)
+        surf = mesh[0]**2 / 500 + mesh[1]**2 / 750
+
         self.grd_axs = gp_Ax3(gp_Pnt(0, 0, 0), gp_Dir(-0.25, 0, 1))
-        self.grd = pln_for_axs(self.grd_axs, [500, 500])
+        #self.grd = pln_for_axs(self.grd_axs, [500, 500])
+        self.grd = spl_face(*mesh, surf)
         self.h_surf = BRep_Tool.Surface(self.grd)
         self.p_trce = GeomAPI_IntCS(ray, self.h_surf)
 
@@ -63,7 +70,7 @@ class Particle (plotocc):
 
         alpha = - self.k / self.m
         ux, uy, uz = alpha * vx, alpha * vy, alpha * vz
-        uy += -0.5 * py
+        #uy += -0.5 * py
         #uz -= cnt.g / (pz)
         uz -= cnt.g
         return np.array([vx, vy, vz, ux, uy, uz])
@@ -74,7 +81,7 @@ class Particle (plotocc):
             self.initial_conditions, t0
         )
         positions = []
-        self.dt = 1.0
+        self.dt = 0.5
         self.pts, self.vel = [], []
         while self.r.successful() and self.r.t < t1:
             txt = "{:03.2f} / {:03.2f} ".format(self.r.t, t1)
@@ -103,26 +110,32 @@ class Particle (plotocc):
                 print()
                 uvw = self.p_trce.Parameters(1)
                 u, v, w = uvw
-                pnt, vec = gp_Pnt(), gp_Vec()
-                GeomLProp_CurveTool.D1(ray, w, pnt, vec)
-                self.pts[-1] = pnt
-                print(self.r.t, w, pnt)
-                print(vec)
+                p0, v0 = gp_Pnt(), gp_Vec()
+                GeomLProp_CurveTool.D1(ray, w, p0, v0)
+                p1, vx, vy = gp_Pnt(), gp_Vec(), gp_Vec()
+                GeomLProp_SurfaceTool.D1(self.h_surf, u, v, p1, vx, vy)
+                vz = vx.Crossed(vy)
+                self.pts[-1] = p0
+                print(self.r.t, w, p0)
+                print(v0)
                 print(gp_Vec(self.pts[-2], self.pts[-1]))
+                norm = gp_Ax3(p1, vec_to_dir(vz), vec_to_dir(vx))
+                v1 = v0
+                v1.Mirror(norm.Ax2())
                 self.r.set_initial_value(
-                    self.gen_condition(pnt, gp_Vec(10, 20, 100)), self.r.t - self.dt * (1 - w))
+                    self.gen_condition(p0, v1), self.r.t + self.dt)
 
 
 if __name__ == '__main__':
-    pnt = gp_Pnt(0, 0, 1)
-    vec = gp_Vec(0, 0, 10)
+    pnt = gp_Pnt(0, 0, 0)
+    vec = gp_Vec(10, 50, 100)
     print(cnt.c, "m/s")
     print(cnt.e)
     print(cnt.g)
     print(cnt.m_e, cnt.m_n, cnt.m_p, cnt.m_u)
 
-    obj = Particle()
-    obj.compute_trajectory(t1=200)
+    obj = Particle(pnt, vec)
+    obj.compute_trajectory(t1=50)
     #obj.show_ellipsoid(rxyz=[6100 * 10**3, 6100 * 10**3, 6000 * 10**3])
     obj.show_axs_pln(obj.grd_axs, scale=25)
     obj.show_axs_pln(scale=50)

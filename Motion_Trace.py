@@ -69,7 +69,7 @@ class Particle (plotocc):
             sys.stdout.flush()
             self.pts.append(gp_Pnt(*r.y[:3]))
             self.vel.append(gp_Vec(*r.y[3:]))
-            # self.check_ground()
+            self.check_ground()
             r.integrate(r.t + dt)
 
         print()
