@@ -15,19 +15,29 @@ from base import plotocc, plot2d
 
 class Particle (plotocc):
 
-    def __init__(self, x0=[0, 0, 10], v0=[0, 1, 0]):
+    def __init__(self, x0=gp_Pnt(0, 0, 1), v0=gp_Vec(0, 0, 10)):
         plotocc.__init__(self)
         self.solver = ode(self.newton).set_integrator('dopri5')
-        self.initial_conditions = np.concatenate((x0, v0))
+        self.initial_conditions = self.set_beam(x0, v0)
         self.q = 1.0
         self.m = 1.0
         self.pts = []
 
+    def set_beam(self, p=gp_Pnt(), v=gp_Vec(0, 0, 1)):
+        return [v.X(), p.Y(), p.Z(), v.X(), v.Y(), v.Z()]
+
+    def get_beam(self, y=[0, 0, 0, 0, 0, 0]):
+        p = gp_Pnt(*y[:3])
+        v = gp_Vec(*y[3:])
+        return p, v
+
     def e_xyz(self, x=1, y=1, z=1):
-        return 10 * np.sign(np.sin(2 * np.pi * x / 25))
+        # return 10 * np.sign(np.sin(2 * np.pi * x / 25))
+        return 10 / (np.abs(x) + 1)
 
     def b_xyz(self, x=1, y=1, z=1):
-        return 2 * x + np.sin(2 * np.pi * y / 25) + np.sin(2 * np.pi * z / 25)
+        # return 2 * x + np.sin(2 * np.pi * y / 25) + np.sin(2 * np.pi * z / 25)
+        return (-2 * (z - 0.5)**2 + 10)
 
     def newton(self, t, Y):
         """
@@ -47,8 +57,8 @@ class Particle (plotocc):
             self.initial_conditions, t0
         )
         positions = []
-        t1 = 200
-        dt = 0.05
+        t1 = 10
+        dt = 0.01
         while r.successful() and r.t < t1:
             txt = "{:03.2f} / {:03.2f} ".format(r.t, t1)
             txt += "| {:03.2f} {:03.2f} {:03.2f} ".format(*r.y[:3])
@@ -67,27 +77,28 @@ class Particle (plotocc):
 
 
 if __name__ == '__main__':
-    pnt = gp_Pnt(0, 0, 1)
-    vec = gp_Vec(0, 0, 10)
+    pnt = gp_Pnt(1, 0, 0)
+    vec = gp_Vec(1, 0, 1)
     print(cnt.c, "m/s")
     print(cnt.e)
     print(cnt.g)
     print(cnt.m_e, cnt.m_n, cnt.m_p, cnt.m_u)
 
-    obj = Particle()
+    obj = Particle(pnt, vec)
 
-    px = np.linspace(-10, 10, 100)
-    py = np.linspace(-10, 10, 100)
+    px = np.linspace(0, 15, 100)
+    py = np.linspace(0, 15, 100)
+    pz = np.linspace(0, 15, 100)
     mesh = np.meshgrid(px, py)
 
     pl2 = plot2d()
-    pl2.contourf_sub(mesh, obj.e_xyz(mesh[0]), png="ex.png")
+    pl2.axs.plot(px, obj.e_xyz(x=px, y=0, z=0))
+    pl2.fig.savefig("ex.png")
 
     pl2.new_fig()
-    pl2.contourf_sub(mesh, obj.b_xyz(*mesh, 0), png="bxy_0.png")
-
-    pl2.new_fig()
-    pl2.contourf_sub(mesh, obj.b_xyz(*mesh, 5), png="bxy_5.png")
+    pl2.axs.set_aspect("auto")
+    pl2.axs.plot(pz, obj.b_xyz(x=0, y=0, z=pz))
+    pl2.fig.savefig("bz.png")
 
     obj.compute_trajectory()
     obj.show_axs_pln(scale=10)
