@@ -5,19 +5,19 @@ import scipy.constants as cnt
 import sys
 from scipy.integrate import ode
 
-from OCC.Coregp import gp_Pnt, gp_Vec, gp_Dir
-from OCC.Coregp import gp_Ax1, gp_Ax2, gp_Ax3
-from OCC.Coregp import gp_Pln
-from OCC.CoreIntAna import IntAna_IntConicQuad, IntAna_Quadric
-from OCC.CoreIntCurve import IntCurve_IConicTool
-from OCC.CoreIntTools import IntTools_Curve
-from OCC.CoreBRep import BRep_Tool
-from OCC.CoreGeom import Geom_Curve, Geom_Line, Geom_Curve
-from OCC.CoreGeomAPI import GeomAPI_IntCS
-from OCC.CoreGeomInt import GeomInt_LineTool
-from OCC.CoreGeomTools import GeomTools_CurveSet
-from OCC.CoreGeomLProp import GeomLProp_SurfaceTool, GeomLProp_CurveTool
-from OCC.CoreTColgp import TColgp_Array1OfPnt
+from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Dir
+from OCC.Core.gp import gp_Ax1, gp_Ax2, gp_Ax3
+from OCC.Core.gp import gp_Pln
+from OCC.Core.IntAna import IntAna_IntConicQuad, IntAna_Quadric
+from OCC.Core.IntCurve import IntCurve_IConicTool
+from OCC.Core.IntTools import IntTools_Curve
+from OCC.Core.BRep import BRep_Tool
+from OCC.Core.Geom import Geom_Curve, Geom_Line, Geom_Curve
+from OCC.Core.GeomAPI import GeomAPI_IntCS
+from OCC.Core.GeomInt import GeomInt_LineTool
+from OCC.Core.GeomTools import GeomTools_CurveSet
+from OCC.Core.GeomLProp import GeomLProp_SurfaceTool, GeomLProp_CurveTool
+from OCC.Core.TColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_polygon
 from OCCUtils.Construct import make_edge, make_plane
 from OCCUtils.Construct import vec_to_dir, dir_to_vec
