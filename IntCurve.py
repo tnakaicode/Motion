@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 import scipy.constants as cnt
 import sys
 
-from OCC.gp import gp_Pnt, gp_Vec, gp_Dir
-from OCC.gp import gp_Ax1, gp_Ax2, gp_Ax3
-from OCC.gp import gp_Pln
-from OCC.BRep import BRep_Tool
-from OCC.GeomLProp import GeomLProp_SurfaceTool, GeomLProp_CurveTool
-from OCC.GeomAPI import GeomAPI_IntCS, GeomAPI_PointsToBSpline
-from OCC.TColgp import TColgp_Array1OfPnt
+from OCC.Coregp import gp_Pnt, gp_Vec, gp_Dir
+from OCC.Coregp import gp_Ax1, gp_Ax2, gp_Ax3
+from OCC.Coregp import gp_Pln
+from OCC.CoreBRep import BRep_Tool
+from OCC.CoreGeomLProp import GeomLProp_SurfaceTool, GeomLProp_CurveTool
+from OCC.CoreGeomAPI import GeomAPI_IntCS, GeomAPI_PointsToBSpline
+from OCC.CoreTColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_plane
 
 from base import spl_2pnt

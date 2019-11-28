@@ -5,9 +5,9 @@ import scipy.constants as cnt
 import sys
 from scipy.integrate import ode
 
-from OCC.gp import gp_Pnt, gp_Vec, gp_Dir
-from OCC.gp import gp_Ax1, gp_Ax2, gp_Ax3
-from OCC.TColgp import TColgp_Array1OfPnt
+from OCC.Coregp import gp_Pnt, gp_Vec, gp_Dir
+from OCC.Coregp import gp_Ax1, gp_Ax2, gp_Ax3
+from OCC.CoreTColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_polygon
 
 from base import plotocc, plot2d
