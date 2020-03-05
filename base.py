@@ -210,6 +210,11 @@ class plot3d (SetDir):
         #self.axs.set_ylim3d(-10, 10)
         #self.axs.set_zlim3d(-10, 10)
 
+    def SavePng(self, pngname=None):
+        if pngname == None:
+            pngname = self.tmpdir + self.rootname + ".png"
+        self.fig.savefig(pngname)
+
     def Show(self):
         try:
             plt.show()

@@ -1,13 +1,17 @@
 # https://flothesof.github.io/charged-particle-trajectories-E-and-B-fields.html
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 from scipy.integrate import ode
 from mpl_toolkits.mplot3d import Axes3D
 
+from base import plot3d
 
-class Particle (object):
+
+class Particle (plot3d):
 
     def __init__(self):
+        plot3d.__init__(self)
         self.solver = ode(self.newton).set_integrator('dopri5')
         self.solver1 = ode(self.newton1).set_integrator('dopri5')
         self.solver2 = ode(self.newton2).set_integrator('dopri5')
@@ -87,19 +91,19 @@ if __name__ == '__main__':
     obj.solver2.set_f_params(1.0, 1.0, 1.0, 10.0)
 
     pos = []
-    t1 = 10
-    dt = 0.05
+    t1 = 11.0
+    dt = 0.005
     while obj.solver.successful() and obj.solver.t < t1:
-        print(obj.solver.t, *obj.solver.y)
         obj.solver.integrate(obj.solver.t + dt)
         pos.append(obj.solver.y[:3])
 
+        txt = "\r {:02.2f} - ".format(obj.solver.t)
+        for v in obj.solver.y:
+            txt += "{:.3f}\t".format(v)
+        sys.stdout.write(txt)
+        sys.stdout.flush()
     pos = np.array(pos)
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot3D(pos[:, 0], pos[:, 1], pos[:, 2])
-    plt.xlabel('x')
-    plt.ylabel('y')
-    ax.set_zlabel('z')
+    obj.axs.plot3D(pos[:, 0], pos[:, 1], pos[:, 2])
+    obj.SavePng()
     plt.show()
