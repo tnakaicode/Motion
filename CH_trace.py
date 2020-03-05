@@ -93,12 +93,12 @@ if __name__ == '__main__':
 
     pl2 = plot2d()
     pl2.axs.plot(px, obj.e_xyz(x=px, y=0, z=0))
-    pl2.fig.savefig("ex.png")
+    pl2.fig.savefig(pl2.tmpdir + "ex.png")
 
     pl2.new_fig()
     pl2.axs.set_aspect("auto")
     pl2.axs.plot(pz, obj.b_xyz(x=0, y=0, z=pz))
-    pl2.fig.savefig("bz.png")
+    pl2.fig.savefig(pl2.tmpdir + "bz.png")
 
     obj.compute_trajectory()
     obj.show_axs_pln(scale=10)
