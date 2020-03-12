@@ -18,28 +18,30 @@ from mpl_toolkits.mplot3d import Axes3D
 from OCC.Display.SimpleGui import init_display
 from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Dir
 from OCC.Core.gp import gp_Ax1, gp_Ax2, gp_Ax3
-from OCC.Core.gp import gp_Quaternion
 from OCC.Core.gp import gp_XYZ
-from OCC.Core.gp import gp_Lin, gp_Pln
+from OCC.Core.gp import gp_Lin, gp_Elips
 from OCC.Core.gp import gp_Mat, gp_GTrsf, gp_Trsf
-from OCC.Core.BRep import BRep_Tool
+from OCC.Core.TopoDS import TopoDS_Shape, TopoDS_Compound
+from OCC.Core.TopLoc import TopLoc_Location
 from OCC.Core.TColgp import TColgp_Array1OfPnt, TColgp_Array2OfPnt
 from OCC.Core.TColgp import TColgp_HArray1OfPnt, TColgp_HArray2OfPnt
-from OCC.Core.GeomAPI import GeomAPI_IntCS, GeomAPI_PointsToBSpline
+from OCC.Core.BRep import BRep_Builder
+from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeSphere
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeWire
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeFace
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_GTransform
+from OCC.Core.GeomAPI import geomapi
 from OCC.Core.GeomAPI import GeomAPI_PointsToBSplineSurface
 from OCC.Core.GeomAPI import GeomAPI_PointsToBSpline
 from OCC.Core.GeomAPI import GeomAPI_Interpolate
 from OCC.Core.GeomAbs import GeomAbs_C0, GeomAbs_C1, GeomAbs_C2
 from OCC.Core.GeomAbs import GeomAbs_G1, GeomAbs_G2
-from OCC.Core.TColgp import TColgp_Array1OfPnt
-from OCC.Core.TopoDS import TopoDS_Shape
-from OCC.Core.TopLoc import TopLoc_Location
-from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeSphere
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeWire
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeFace
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_GTransform
-from OCC.Extend.ShapeFactory import make_box, make_wire
-from OCC.Extend.ShapeFactory import points_to_bspline
+from OCC.Core.GeomFill import GeomFill_BoundWithSurf
+from OCC.Core.GeomFill import GeomFill_BSplineCurves
+from OCC.Core.GeomFill import GeomFill_StretchStyle, GeomFill_CoonsStyle, GeomFill_CurvedStyle
+from OCC.Core.AIS import AIS_Manipulator
+from OCCUtils.Construct import make_box, make_line, make_wire, make_edge
+from OCCUtils.Construct import make_plane, make_polygon
 from OCCUtils.Construct import make_line, make_plane, make_polygon
 from OCCUtils.Construct import make_face
 from OCCUtils.Construct import point_to_vector, vector_to_point
@@ -64,9 +66,18 @@ def create_tempdir(flag=1):
     return tmpdir
 
 
+def create_tempnum(name, tmpdir="./", ext=".tar.gz"):
+    num = len(glob.glob(tmpdir + name + "*" + ext)) + 1
+    filename = '{}{}_{:03}{}'.format(tmpdir, name, num, ext)
+    #print(num, filename)
+    return filename
+
+
 class SetDir (object):
 
     def __init__(self):
+        self.tempname = ""
+        self.rootname = ""
         self.create_tempdir()
 
         pyfile = sys.argv[0]
@@ -92,15 +103,23 @@ class SetDir (object):
 
 class plot2d (SetDir):
 
-    def __init__(self):
+    def __init__(self, aspect="equal"):
         SetDir.__init__(self)
-        self.new_fig()
+        self.new_fig(aspect)
 
-    def new_fig(self):
+    def new_fig(self, aspect="equal"):
         self.fig, self.axs = plt.subplots()
-        self.axs.set_aspect('equal')
+        self.axs.set_aspect(aspect)
         self.axs.xaxis.grid()
         self.axs.yaxis.grid()
+
+    def add_axs(self, row=1, col=1, num=1, aspect="auto"):
+        self.axs.set_axis_off()
+        axs = self.fig.add_subplot(row, col, num)
+        axs.set_aspect(aspect)
+        axs.xaxis.grid()
+        axs.yaxis.grid()
+        return axs
 
     def div_axs(self):
         self.div = make_axes_locatable(self.axs)
@@ -116,11 +135,11 @@ class plot2d (SetDir):
         self.ax_y.xaxis.grid(True, zorder=0)
         self.ax_y.yaxis.grid(True, zorder=0)
 
-    def contourf_sub(self, mesh, func, loc=[0, 0], level=None, png="../tmp/ex.png"):
+    def contourf_sub(self, mesh, func, sxy=[0, 0], level=None, png="../tmp/ex.png"):
         self.new_fig()
         self.div_axs()
         nx, ny = mesh[0].shape
-        sx, sy = loc
+        sx, sy = sxy
         xs, xe = mesh[0][0, 0], mesh[0][0, -1]
         ys, ye = mesh[1][0, 0], mesh[1][-1, 0]
         mx = np.searchsorted(mesh[0][0, :], sx) - 1
@@ -136,6 +155,10 @@ class plot2d (SetDir):
         plt.tight_layout()
         self.fig.savefig(png)
         # plt.close()
+
+    def contourf_tri(self, x, y, z):
+        self.new_fig()
+        self.axs.tricontourf(x, y, z, cmap="jet")
 
     def SavePng(self, pngname=None):
         if pngname == None:
@@ -242,6 +265,16 @@ def move_pnt_to_dir(axs=gp_Ax3(), scale=100):
     return vector_to_point(vec)
 
 
+def pnt_from_axs(axs=gp_Ax3(), length=100):
+    vec = point_to_vector(axs.Location()) + \
+        dir_to_vec(axs.Direction()) * length
+    return vector_to_point(vec)
+
+
+def line_from_axs(axs=gp_Ax3(), length=100):
+    return make_edge(axs.Location(), pnt_from_axs(axs, length))
+
+
 def pnt_trf_vec(pnt=gp_Pnt(), vec=gp_Vec()):
     v = point_to_vector(pnt)
     v.Add(vec)
@@ -280,7 +313,7 @@ def gen_ellipsoid(axs=gp_Ax3(), rxyz=[10, 20, 30]):
     return ellips
 
 
-def spl_face(px, py, pz):
+def spl_face(px, py, pz, axs=gp_Ax3()):
     nx, ny = px.shape
     pnt_2d = TColgp_Array2OfPnt(1, nx, 1, ny)
     for row in range(pnt_2d.LowerRow(), pnt_2d.UpperRow() + 1):
@@ -294,13 +327,48 @@ def spl_face(px, py, pz):
     api.Interpolate(pnt_2d)
     #surface = BRepBuilderAPI_MakeFace(curve, 1e-6)
     # return surface.Face()
-    return BRepBuilderAPI_MakeFace(api.Surface(), 1e-6).Face()
+    face = BRepBuilderAPI_MakeFace(api.Surface(), 1e-6).Face()
+    face.Location(set_loc(gp_Ax3(), axs))
+    return face
+
+
+def spl_curv(px, py, pz):
+    num = px.size
+    pts = []
+    p_array = TColgp_Array1OfPnt(1, num)
+    for idx, t in enumerate(px):
+        x = px[idx]
+        y = py[idx]
+        z = pz[idx]
+        pnt = gp_Pnt(x, y, z)
+        pts.append(pnt)
+        p_array.SetValue(idx + 1, pnt)
+    api = GeomAPI_PointsToBSpline(p_array)
+    return p_array, api.Curve()
+
+
+def spl_curv_pts(pts=[gp_Pnt()]):
+    num = len(pts)
+    p_array = TColgp_Array1OfPnt(1, num)
+    for idx, pnt in enumerate(pts):
+        p_array.SetValue(idx + 1, pnt)
+    api = GeomAPI_PointsToBSpline(p_array)
+    return p_array, api.Curve()
+
+
+class GenCompound (object):
+
+    def __init__(self):
+        self.builder = BRep_Builder()
+        self.compound = TopoDS_Compound()
+        self.builder.MakeCompound(compound)
 
 
 class plotocc (SetDir):
 
     def __init__(self):
-        self.display, self.start_display, self.add_menu, self.add_functionto_menu = init_display()
+        self.display, self.start_display, self.add_menu, self.add_function = init_display()
+        self.base_axs = gp_Ax3()
         SetDir.__init__(self)
 
     def show_box(self, axs=gp_Ax3(), lxyz=[100, 100, 100]):
@@ -320,9 +388,20 @@ class plotocc (SetDir):
     def show_pnt(self, xyz=[0, 0, 0]):
         self.display.DisplayShape(gp_Pnt(*xyz))
 
+    def show_pts(self, pts=[gp_Pnt()], num=1):
+        for p in pts[::num]:
+            self.display.DisplayShape(p)
+        self.display.DisplayShape(make_polygon(pts))
+
     def show_ball(self, scale=100, trans=0.5):
         shape = BRepPrimAPI_MakeSphere(scale).Shape()
         self.display.DisplayShape(shape, transparency=trans)
+
+    def show_vec(self, beam=gp_Ax3(), scale=1.0):
+        pnt = beam.Location()
+        vec = dir_to_vec(beam.Direction()).Scaled(scale)
+        print(vec.Magnitude())
+        self.display.DisplayVector(vec, pnt)
 
     def show_ellipsoid(self, axs=gp_Ax3(), rxyz=[10., 10., 10.], trans=0.5):
         shape = gen_ellipsoid(axs, rxyz)
@@ -351,6 +430,53 @@ class plotocc (SetDir):
         vec = dir_to_vec(axs.Direction())
         pln = make_plane(pnt, vec, -scale, scale, -scale, scale)
         self.display.DisplayShape(pln)
+
+    def make_EllipWire(self, rxy=[1.0, 1.0], shft=0.0, axs=gp_Ax3()):
+        rx, ry = rxy
+        if rx > ry:
+            major_radi = rx
+            minor_radi = ry
+            axis = gp_Ax2()
+            axis.SetXDirection(axis.XDirection())
+        else:
+            major_radi = ry
+            minor_radi = rx
+            axis = gp_Ax2()
+            axis.SetXDirection(axis.YDirection())
+        axis.Rotate(axis.Axis(), np.deg2rad(shft))
+        elip = make_edge(gp_Elips(axis, major_radi, minor_radi))
+        poly = make_wire(elip)
+        poly.Location(set_loc(gp_Ax3(), axs))
+        return poly
+
+    def make_PolyWire(self, num=6, radi=1.0, shft=0.0, axs=gp_Ax3()):
+        lxy = radi
+        pnts = []
+        angl = 360 / num
+        for i in range(num):
+            thet = np.deg2rad(i * angl) + np.deg2rad(shft)
+            x, y = radi * np.sin(thet), radi * np.cos(thet)
+            pnts.append(gp_Pnt(x, y, 0))
+        pnts.append(pnts[0])
+        poly = make_polygon(pnts)
+        poly.Location(set_loc(gp_Ax3(), axs))
+        return poly
+
+    def AddManipulator(self):
+        self.manip = AIS_Manipulator(self.base_axs.Ax2())
+        ais_shp = self.display.DisplayShape(
+            self.base_axs.Location(),
+            update=True
+        )
+        self.manip.Attach(ais_shp)
+
+    def SaveMenu(self):
+        self.add_menu("File")
+        self.add_function("File", self.export_cap)
+
+    def export_cap(self):
+        pngname = create_tempnum(self.rootname, self.tmpdir, ".png")
+        self.display.View.Dump(pngname)
 
     def show(self):
         self.display.FitAll()
