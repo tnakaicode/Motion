@@ -35,7 +35,7 @@ while r.successful() and r.t < t1:
 positions = np.array(positions)
 
 plt.plot(positions[:, 1], positions[:, 2])
-plt.show()
+# plt.show()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
