@@ -9,10 +9,10 @@ import matplotlib.animation as animation
 import random
 import math
 import datetime
-sys.path.append(os.path.join('../'))
 
-from src.particle.base import Calculater
-from src.particle.Tornade import TornadeSystem
+sys.path.append(os.path.join('./'))
+from particle.base import Calculater
+from particle.Tornade import TornadeSystem
 
 
 if __name__ == '__main__':

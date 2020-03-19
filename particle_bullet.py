@@ -10,10 +10,9 @@ import random
 import math
 import datetime
 
-sys.path.append(os.path.join('../'))
-
-from src.particle.BulletWall import BulletWallSystem
-from src.particle.base import Calculater
+sys.path.append(os.path.join('./'))
+from particle.BulletWall import BulletWallSystem
+from particle.base import Calculater
 
 if __name__ == '__main__':
     cutoff_r = 1.0

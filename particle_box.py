@@ -9,10 +9,10 @@ import matplotlib.animation as animation
 import random
 import math
 import datetime
-sys.path.append(os.path.join('../'))
 
-from src.particle.BoxGravity import BoxGravitySystem
-from src.particle.base import Calculater
+sys.path.append(os.path.join('./'))
+from particle.BoxGravity import BoxGravitySystem
+from particle.base import Calculater
 
 if __name__ == '__main__':
     cutoff_r = 1.0

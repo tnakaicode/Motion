@@ -8,3 +8,5 @@ __pycache__/
 # Temp
 temp_*/*
 */temp_*/*
+
+*.gif
