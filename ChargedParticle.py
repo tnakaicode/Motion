@@ -37,24 +37,18 @@ if __name__ == '__main__':
     v0 = np.array([1, 1, 0])
     initial_conditions = np.concatenate((x0, v0))
 
-    obj.solver.set_initial_value(initial_conditions, t0)
-    obj.solver.set_f_params(-1.0, 1.0)
-
-    obj.solver1.set_initial_value(initial_conditions, t0)
-    obj.solver1.set_f_params(1.0, 1.0, 1.0)
-
-    obj.solver2.set_initial_value(initial_conditions, t0)
-    obj.solver2.set_f_params(1.0, 1.0, 1.0, 10.0)
+    obj.sol.solver.set_initial_value(initial_conditions, t0)
+    obj.sol.solver.set_f_params(-1.0, 1.0)
 
     pos = []
     t1 = 11.0
     dt = 0.005
-    while obj.solver.successful() and obj.solver.t < t1:
-        obj.solver.integrate(obj.solver.t + dt)
-        pos.append(obj.solver.y[:3])
+    while obj.sol.solver.successful() and obj.sol.solver.t < t1:
+        obj.sol.solver.integrate(obj.sol.solver.t + dt)
+        pos.append(obj.sol.solver.y[:3])
 
-        txt = "\r {:02.2f} - ".format(obj.solver.t)
-        for v in obj.solver.y:
+        txt = "\r {:02.2f} - ".format(obj.sol.solver.t)
+        for v in obj.sol.solver.y:
             txt += "{:.3f}\t".format(v)
         sys.stdout.write(txt)
         sys.stdout.flush()
