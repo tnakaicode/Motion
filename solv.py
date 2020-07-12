@@ -20,6 +20,12 @@ class ChargeParticle(object):
         else:
             self.newton = self.newton0
 
+    def e_of_x(self, x):
+        return 10 * np.sign(np.sin(2 * np.pi * x / 25))
+
+    def b_xyz(self, x=1, y=1, z=1):
+        return 2 * x + np.sin(2 * np.pi * y / 25) + np.sin(2 * np.pi * z / 25)
+
     def newton0(self, t, Y, q, m):
         """
         Computes the derivative of the state vector y according to the equation of motion:
