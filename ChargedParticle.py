@@ -6,6 +6,7 @@ from scipy.integrate import ode
 from mpl_toolkits.mplot3d import Axes3D
 
 from base import plot3d
+from solv import ChargeParticle
 
 
 class Particle (plot3d):

@@ -19,7 +19,7 @@ from OCC.Display.SimpleGui import init_display
 from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Dir
 from OCC.Core.gp import gp_Ax1, gp_Ax2, gp_Ax3
 from OCC.Core.gp import gp_XYZ
-from OCC.Core.gp import gp_Lin, gp_Elips
+from OCC.Core.gp import gp_Pln, gp_Lin, gp_Elips
 from OCC.Core.gp import gp_Mat, gp_GTrsf, gp_Trsf
 from OCC.Core.TopoDS import TopoDS_Shape, TopoDS_Compound
 from OCC.Core.TopLoc import TopLoc_Location
