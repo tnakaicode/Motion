@@ -56,4 +56,3 @@ if __name__ == '__main__':
 
     obj.axs.plot3D(pos[:, 0], pos[:, 1], pos[:, 2])
     obj.SavePng()
-    plt.show()

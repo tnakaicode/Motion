@@ -12,13 +12,12 @@ from OCC.Core.GeomAPI import GeomAPI_IntCS, GeomAPI_PointsToBSpline
 from OCC.Core.TColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_plane
 
-from particle.base import spl_2pnt
-
+from particle.base import spl_curv_pts
 
 if __name__ == '__main__':
     p0 = gp_Pnt(10, 10, 50)
     p1 = gp_Pnt(-20, -20, -50)
-    crv = spl_2pnt(p0, p1)
+    pts, crv = spl_curv_pts([p0, p1])
     pln = make_plane(vec_normal=gp_Vec(0, 1, 1))
     h_surf = BRep_Tool.Surface(pln)
     api = GeomAPI_IntCS(crv, h_surf)

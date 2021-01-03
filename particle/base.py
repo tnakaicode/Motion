@@ -96,7 +96,7 @@ def create_tempnum(name, tmpdir="./", ext=".tar.gz"):
 
 
 class SetDir (object):
-
+    
     def __init__(self):
         self.root_dir = os.getcwd()
         self.tempname = ""
