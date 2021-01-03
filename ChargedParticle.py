@@ -5,8 +5,8 @@ import sys
 from scipy.integrate import ode
 from mpl_toolkits.mplot3d import Axes3D
 
-from base import plot3d, plotocc
-from solv import ChargeParticle
+from particle.base import plot3d, plotocc
+from particle.solv import ChargeParticle
 
 
 class Particle (plot3d):

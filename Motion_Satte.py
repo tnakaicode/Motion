@@ -22,8 +22,8 @@ from OCCUtils.Construct import make_polygon
 from OCCUtils.Construct import make_edge, make_plane
 from OCCUtils.Construct import vec_to_dir, dir_to_vec
 
-from base import plotocc, plot2d
-from base import pln_for_axs, gen_ellipsoid, spl_2pnt, spl_face
+from particle.base import plotocc, plot2d
+from particle.base import pln_for_axs, gen_ellipsoid, spl_2pnt, spl_face
 
 # Earth Radius: 6, 371 km
 # F_g = G m_1 * m_2 / (r_1 * r_2)

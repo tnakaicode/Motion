@@ -7,7 +7,7 @@ from linecache import getline, clearcache
 from optparse import OptionParser
 
 sys.path.append(os.path.join("./"))
-from base import plot2d, plot3d
+from particle.base import plot2d, plot3d
 
 import logging
 logging.getLogger('matplotlib').setLevel(logging.ERROR)

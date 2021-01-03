@@ -10,7 +10,7 @@ from OCC.Core.gp import gp_Ax1, gp_Ax2, gp_Ax3
 from OCC.Core.TColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_polygon
 
-from base import plotocc, plot2d
+from particle.base import plotocc, plot2d
 
 
 class Particle (plotocc):

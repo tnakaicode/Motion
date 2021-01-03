@@ -12,7 +12,7 @@ from OCC.Core.GeomAPI import GeomAPI_IntCS, GeomAPI_PointsToBSpline
 from OCC.Core.TColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_plane
 
-from base import spl_2pnt
+from particle.base import spl_2pnt
 
 
 if __name__ == '__main__':

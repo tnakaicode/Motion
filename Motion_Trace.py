@@ -21,8 +21,8 @@ from OCC.Core.TColgp import TColgp_Array1OfPnt
 from OCCUtils.Construct import make_polygon
 from OCCUtils.Construct import make_edge, make_plane
 
-from base import plotocc, plot2d
-from base import pln_for_axs
+from particle.base import plotocc, plot2d
+from particle.base import pln_for_axs
 
 
 class Particle (plotocc):
